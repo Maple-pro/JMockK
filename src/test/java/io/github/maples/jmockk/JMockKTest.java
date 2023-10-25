@@ -29,9 +29,37 @@ public class JMockKTest {
     }
 
     @Test
-    public void testWhen() throws NoSuchMethodException {
+    public void testMockkStatic() {
+
+    }
+
+    @Test
+    public void testunmockStatic() {
+
+    }
+
+    @Test
+    public void testMockkObject() {
+
+    }
+
+    @Test
+    public void testUnmockkObject() {
+
+    }
+
+
+    @Test
+    public void testWhenPublic() throws NoSuchMethodException {
         Foo foo = spyk(Foo.class);
-        when(foo, Foo.class.getMethod("foo")).thenReturn(3);
+        when(foo, Visibility.PUBLIC, "foo").thenReturn(3);
+        System.out.println(foo.foo());
+    }
+
+    @Test
+    public void testWhenPrivate() throws NoSuchMethodException {
+        Foo foo = spyk(Foo.class);
+        when(foo, Visibility.PRIVATE, "test").thenReturn(false);
         System.out.println(foo.foo());
     }
 

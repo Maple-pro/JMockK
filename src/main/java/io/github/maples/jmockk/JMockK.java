@@ -2,14 +2,11 @@ package io.github.maples.jmockk;
 
 import io.github.maples.jmockk.stubbing.FunctionStubbing;
 import io.github.maples.jmockk.stubbing.OngoingStubbing;
-import io.mockk.MockK;
 import io.mockk.MockKGateway;
-import io.mockk.MockKKt;
 import io.mockk.MockKStubScope;
 import io.mockk.impl.JvmMockKGateway;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
-import kotlin.jvm.internal.Lambda;
 import kotlin.jvm.internal.Reflection;
 import kotlin.reflect.KClass;
 
@@ -77,8 +74,13 @@ public class JMockK {
     }
 
     // TODO
-    public static <T> OngoingStubbing<T> when(Object mockObject, Method methodToMock, Object... args) {
-        Function1 stubBlock = new FunctionStubbing(mockObject, methodToMock, args);
+    public static <T> OngoingStubbing<T> when(
+            Object mockObject,
+            Visibility methodVisibility,
+            String methodName,
+            Object... args
+    ) {
+        Function1 stubBlock = new FunctionStubbing(mockObject, methodVisibility, methodName, args);
 
         MockKStubScope mockKStubScope = every(stubBlock);
 

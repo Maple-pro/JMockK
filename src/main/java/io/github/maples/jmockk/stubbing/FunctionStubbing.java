@@ -1,23 +1,33 @@
 package io.github.maples.jmockk.stubbing;
 
+import io.github.maples.jmockk.Visibility;
 import io.mockk.MockKMatcherScope;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.internal.Intrinsics;
 import kotlin.jvm.internal.Lambda;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class FunctionStubbing<T> extends Lambda implements Function1 {
     T mockObject;
-    Method methodToMock;
+    Visibility methodVisibility;
+    String methodName;
     Object[] args;
+    Class<?>[] parameterTypes;
 
-    public FunctionStubbing(T mockObject, Method methodToMock, Object... args) {
+    public FunctionStubbing(
+            T mockObject,
+            Visibility methodVisibility,
+            String methodName,
+            Object... args
+    ) {
         super(1);
         this.mockObject = mockObject;
-        this.methodToMock = methodToMock;
+        this.methodVisibility = methodVisibility;
+        this.methodName = methodName;
         this.args = args;
+        parameterTypes = Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new);
     }
 
     @Override
@@ -29,9 +39,21 @@ public class FunctionStubbing<T> extends Lambda implements Function1 {
     public Object invoke(MockKMatcherScope mockKMatcherScope) {
         Intrinsics.checkNotNullParameter(mockKMatcherScope, "$this$every");
         try {
-            return mockObject.getClass().getMethod(methodToMock.getName(), methodToMock.getParameterTypes()).invoke(mockObject, args);
+            switch (methodVisibility) {
+                case PUBLIC:
+                case PROTECTED:
+                case PACKAGE:
+                    return mockObject
+                            .getClass()
+                            .getMethod(methodName, parameterTypes)
+                            .invoke(mockObject, args);
+                case PRIVATE:
+                    return mockKMatcherScope.get(mockObject, methodName).invoke(args);
+            }
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+
+        return null;
     }
 }
