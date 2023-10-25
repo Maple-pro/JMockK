@@ -5,6 +5,7 @@ import io.mockk.MockKMatcherScope;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.internal.Intrinsics;
 import kotlin.jvm.internal.Lambda;
+import org.apache.commons.lang3.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -27,7 +28,12 @@ public class FunctionStubbing<T> extends Lambda implements Function1 {
         this.methodVisibility = methodVisibility;
         this.methodName = methodName;
         this.args = args;
-        parameterTypes = Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new);
+        parameterTypes = Arrays.stream(args)
+                .map(arg -> {
+                    Class<?> parameterType = arg.getClass();
+                    return ClassUtils.wrapperToPrimitive(parameterType);
+                })
+                .toArray(Class<?>[]::new);
     }
 
     @Override
@@ -39,21 +45,15 @@ public class FunctionStubbing<T> extends Lambda implements Function1 {
     public Object invoke(MockKMatcherScope mockKMatcherScope) {
         Intrinsics.checkNotNullParameter(mockKMatcherScope, "$this$every");
         try {
-            switch (methodVisibility) {
-                case PUBLIC:
-                case PROTECTED:
-                case PACKAGE:
-                    return mockObject
-                            .getClass()
-                            .getMethod(methodName, parameterTypes)
-                            .invoke(mockObject, args);
-                case PRIVATE:
-                    return mockKMatcherScope.get(mockObject, methodName).invoke(args);
-            }
+            return switch (methodVisibility) {
+                case PUBLIC, PROTECTED, PACKAGE -> mockObject
+                        .getClass()
+                        .getMethod(methodName, parameterTypes)
+                        .invoke(mockObject, args);
+                case PRIVATE -> mockKMatcherScope.get(mockObject, methodName).invoke(args);
+            };
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 }

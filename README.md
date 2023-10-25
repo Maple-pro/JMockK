@@ -8,12 +8,24 @@ Features
 
 - [x] `mockk`
 - [x] `spyk`
-- [ ] `mockkStatic`
+- [x] `spyk(Person(name()))`: use the target constructor
+- [x] `mockkStatic`
 - [ ] `unmockkStatic`
-- [ ] `mockkObject`
+- [x] `mockkObject`
 - [ ] `unmockkObject`
-- [ ] `every { }` -> `when()`
+- [x] `every { }` -> `when()`
   - [x] public methods
   - [x] private methods
-  - [ ] static methods
+  - [x] static methods
+  - [x] methods of object
 - [x] `returns { }` -> `thenReturn()`
+- [ ] mock fields
+  - [ ] field in class
+  - [ ] static field
+  - [ ] field in object
+
+> We need the `answers` method to support the fields mocking.
+
+## Reference
+
+- [MockK: Property backing fields](https://mockk.io/#property-backing-fields)
