@@ -12,9 +12,6 @@ public class JMockKTest {
         int result1 = foo.foo();
         boolean result2 = foo.bar();
 
-        System.out.println(result1);
-        System.out.println(result2);
-
         Assert.assertEquals(0, result1);
         Assert.assertFalse(result2);
     }
@@ -23,7 +20,6 @@ public class JMockKTest {
     public void testSpyk() {
         Foo foo = spyk(new Foo(1));
         int result = foo.foo();
-        System.out.println(result);
 
         Assert.assertEquals(2, result);
     }
@@ -33,8 +29,8 @@ public class JMockKTest {
         Foo foo = spyk(new Foo(10));
         mockkStatic(Foo.class);
         whenStatic(Foo.class, false, Visibility.PRIVATE, "privateStaticMethod").thenReturn(false);
-        System.out.println(foo.printA());
-        Assert.assertEquals(9, foo.printA());
+        int res = foo.printA();
+        Assert.assertEquals(9, res);
     }
 
     @Test
@@ -53,7 +49,6 @@ public class JMockKTest {
         mockkObject(KotlinObject.class);
         whenStatic(KotlinObject.class, true, Visibility.PUBLIC, "bar").thenReturn(false);
         boolean res = KotlinObject.INSTANCE.bar();
-        System.out.println(res);
         Assert.assertFalse(res);
     }
 
@@ -81,14 +76,17 @@ public class JMockKTest {
     public void testWhenPublic() {
         Foo foo = spyk(new Foo(1));
         when(foo, Visibility.PUBLIC, "foo").thenReturn(3);
-        System.out.println(foo.foo());
+        when(foo, Visibility.PUBLIC, "bar").thenReturn(false);
+        Assert.assertEquals(3, foo.foo());
+        Assert.assertFalse(foo.bar());
     }
 
     @Test
     public void testWhenPrivate() {
         Foo foo = spyk(new Foo(1));
-        when(foo, Visibility.PRIVATE, "test").thenReturn(false);
-        System.out.println(foo.foo());
+        when(foo, Visibility.PRIVATE, "test").thenReturn(true);
+        int res = foo.foo();
+        Assert.assertEquals(1, res);
     }
 
     @Test
@@ -117,7 +115,24 @@ public class JMockKTest {
         KotlinClass kotlinClass = spyk(KotlinClass.class);
         when(kotlinClass, Visibility.PUBLIC, "bar", 2).thenReturn(false);
 
-        System.out.println(kotlinClass.foo(10));
+        int res = kotlinClass.foo(10);
+        Assert.assertEquals(11, res);
+    }
+
+    @Test
+    public void testComplexType() {
+        KotlinClass kotlinClass = spyk(KotlinClass.class);
+
+        Person person = mockk(Person.class, true); // parameter
+        Person returnPerson = mockk(Person.class, true); // return
+
+        when(returnPerson, Visibility.PUBLIC, "getName").thenReturn("yangfeng");
+        Assert.assertEquals("yangfeng", returnPerson.getName());
+
+        when(kotlinClass, Visibility.PUBLIC, "getPerson", person).thenReturn(returnPerson);
+
+        Person res = kotlinClass.getPerson(person);
+        Assert.assertEquals("yangfeng", res.getName());
     }
 
 }

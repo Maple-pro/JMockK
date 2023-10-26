@@ -12,4 +12,8 @@ class KotlinClass {
     fun bar(param: Int): Boolean {
         return true
     }
+
+    fun getPerson(person: Person): Person {
+        return Student()
+    }
 }

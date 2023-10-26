@@ -1,7 +1,7 @@
 package io.github.maples.jmockk.stubbing;
 
 import io.github.maples.jmockk.Visibility;
-import io.github.maples.jmockk.utils.ReflectUtils;
+import io.github.maples.jmockk.utils.ReflectionUtils;
 import io.mockk.MockKMatcherScope;
 import kotlin.jvm.functions.Function1;
 import kotlin.jvm.internal.Intrinsics;
@@ -33,16 +33,7 @@ public class StaticFunctionStubbing extends Lambda implements Function1 {
         this.methodVisibility = methodVisibility;
         this.methodName = methodName;
         this.args = args;
-        parameterTypes = Arrays.stream(args)
-                .map(arg -> {
-                    Class<?> parameterType = arg.getClass();
-                    if (ClassUtils.wrapperToPrimitive(parameterType) == null) {
-                        return parameterType;
-                    } else {
-                        return ClassUtils.wrapperToPrimitive(parameterType);
-                    }
-                })
-                .toArray(Class<?>[]::new);
+        parameterTypes = ReflectionUtils.parameter2Types(args);
     }
 
     @Override
@@ -53,28 +44,27 @@ public class StaticFunctionStubbing extends Lambda implements Function1 {
 
     public Object invoke(MockKMatcherScope mockKMatcherScope) {
         Intrinsics.checkNotNullParameter(mockKMatcherScope, "$this$every");
+
         try {
-            switch (methodVisibility) {
-                case PUBLIC, PROTECTED, PACKAGE -> {
-                    if(isObjectMethod) {
-                        Object instance = ReflectUtils.getInstance(staticClass);
-                        if (instance == null) {
-                            throw new RuntimeException("Cannot get instance of " + staticClass.getName());
-                        }
-                        return instance.getClass().getMethod(methodName, parameterTypes).invoke(instance, args);
-                    } else {
-                        return staticClass.getMethod(methodName, parameterTypes).invoke(null, args);
-                    }
+            if(isObjectMethod) {
+                Object instance = ReflectionUtils.getInstance(staticClass);
+                if (instance == null) {
+                    throw new RuntimeException("Cannot get instance of " + staticClass.getName());
                 }
-                case PRIVATE -> {
-                    Method method = staticClass.getDeclaredMethod(methodName, parameterTypes);
-                    method.setAccessible(true);
-                    return method.invoke(null, args);
+                Method targetMethod = ReflectionUtils.getMethod(instance.getClass(), methodName, parameterTypes);
+                if (methodVisibility == Visibility.PRIVATE) {
+                    targetMethod.setAccessible(true);
                 }
-            };
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                return targetMethod.invoke(instance, args);
+            } else {
+                Method targetMethod = ReflectionUtils.getMethod(staticClass, methodName, parameterTypes);
+                if (methodVisibility == Visibility.PRIVATE) {
+                    targetMethod.setAccessible(true);
+                }
+                return targetMethod.invoke(null, args);
+            }
+        } catch (RuntimeException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 }

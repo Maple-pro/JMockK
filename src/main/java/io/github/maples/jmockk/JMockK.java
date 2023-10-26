@@ -3,7 +3,7 @@ package io.github.maples.jmockk;
 import io.github.maples.jmockk.stubbing.FunctionStubbing;
 import io.github.maples.jmockk.stubbing.OngoingStubbing;
 import io.github.maples.jmockk.stubbing.StaticFunctionStubbing;
-import io.github.maples.jmockk.utils.ReflectUtils;
+import io.github.maples.jmockk.utils.ReflectionUtils;
 import io.mockk.MockKCancellationRegistry;
 import io.mockk.MockKGateway;
 import io.mockk.MockKKt;
@@ -127,7 +127,7 @@ public class JMockK {
      */
     @SafeVarargs
     public static <T> void mockkObject(Class<T>... objectsToMock) {
-        List<T> instances = Arrays.stream(objectsToMock).map(ReflectUtils::getInstance).toList();
+        List<T> instances = Arrays.stream(objectsToMock).map(ReflectionUtils::getInstance).toList();
 
         for (T instance : instances) {
             Function0 mockkFunction = objectMockFactory.objectMockk(instance, false);

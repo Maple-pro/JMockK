@@ -4,7 +4,7 @@ A Java adapter for MockK tool.
 
 ## To do list
 
-Features
+Features:
 
 - [x] `mockk`
 - [x] `spyk`
@@ -23,6 +23,12 @@ Features
   - [ ] field in class
   - [ ] static field
   - [ ] field in object
+
+Robustness:
+
+- [x] Multiple every
+- [x] Use more complex parameter types and return types
+- [ ] Use JMockK in real android projects
 
 > We need the `answers` method to support the fields mocking.
 

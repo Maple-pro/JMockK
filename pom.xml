@@ -6,7 +6,7 @@
 
     <groupId>io.github.Maple-pro</groupId>
     <artifactId>JMockK</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
     <name>JMockK</name>
     <description>A Java adapter for MockK library</description>
     <url>https://github.com/Maple-pro/JMockK.git</url>
