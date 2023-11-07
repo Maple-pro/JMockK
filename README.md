@@ -28,7 +28,7 @@ Robustness:
 
 - [x] Multiple every
 - [x] Use more complex parameter types and return types
-- [ ] Use JMockK in real android projects
+- [x] Use JMockK in real android projects
 
 > We need the `answers` method to support the fields mocking.
 
